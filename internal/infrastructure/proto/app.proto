@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+package golden;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "markitos-it-svc-golden-grpc/gapi";
+
+message Golden {
+  string id = 1;
+  string name = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
+  string content = 5;
+  string poster = 6;
+  /* ___CUSTOM_FIELDS___*/ 
+}
+
+service Goldenservice {
+  rpc CreateGolden(CreateGoldenRequest) returns (CreateGoldenResponse);
+  rpc GetGolden(GetGoldenRequest) returns (GetGoldenResponse);
+  rpc UpdateGolden(UpdateGoldenRequest) returns (UpdateGoldenResponse);
+  rpc DeleteGolden(DeleteGoldenRequest) returns (DeleteGoldenResponse);
+  rpc ListGoldens(ListGoldensRequest) returns (ListGoldensResponse);
+  rpc SearchGoldens(SearchGoldensRequest) returns (SearchGoldensResponse);
+}
+
+message CreateGoldenRequest {
+  string name = 1;
+  string content = 2;
+  string poster_data = 3;
+  /* ___CUSTOM_FIELDS___*/ 
+}
+
+message CreateGoldenResponse {
+  string id = 1;
+  string name = 2;
+  string content = 3;
+  string poster = 4;
+  /* ___CUSTOM_FIELDS___*/ 
+}
+
+message GetGoldenRequest {
+  string id = 1;
+}
+
+message GetGoldenResponse {
+  string id = 1;
+  string name = 2;
+  string content = 3;
+  string poster = 4;
+  /* ___CUSTOM_FIELDS___*/ 
+}
+
+message UpdateGoldenRequest {
+  string id = 1;
+  string name = 2;
+  string content = 3;
+  string poster_data = 4;
+  /* ___CUSTOM_FIELDS___*/ 
+}
+
+message UpdateGoldenResponse {
+  string updated = 1;
+}
+
+message DeleteGoldenRequest {
+  string id = 1;
+}
+
+message DeleteGoldenResponse {
+  string deleted = 1;
+}
+
+message ListGoldensRequest {}
+
+message ListGoldensResponse {
+  repeated Golden goldens = 1;
+}
+
+message SearchGoldensRequest {
+  string search_term = 1;
+  int32 page_number = 2;
+  int32 page_size = 3;
+}
+
+message SearchGoldensResponse {
+  repeated Golden goldens = 1;
+  int32 total_results = 2;
+}

@@ -1,0 +1,21 @@
+services:
+  markitos-it-svc-golden-postgres:
+    image: postgres:17-alpine
+    container_name: markitos-it-svc-golden-postgres
+    environment:
+      POSTGRES_USER: markitos_it_svc_golden
+      POSTGRES_PASSWORD: markitos_it_svc_golden
+      POSTGRES_DB: markitos_it_svc_golden
+    ports:
+      - "5432:5432"
+    volumes:
+      - markitos-it-svc-golden-postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d markitos-it-svc-golden"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  markitos-it-svc-golden-postgres_data:
+    driver: local

@@ -1,0 +1,23 @@
+project: access
+entity: clonator
+entities: clonators
+version: 0.1.0
+description: A clonator is a tool that allows you to clone repositories and manage them efficiently.
+fields:
+  - name: surname
+    type: string
+    description: The surname of the clonator.
+    required: false
+    default: "My Clonator"
+    validation: "^[a-zA-Z0-9_-]+$"
+  - name: slogan
+    type: string
+    description: A slogan for the clonator.
+    required: true
+    default: "A tool to clone repositories."
+  - name: repositories
+    type: string
+    description: A list of repositories that the clonator manages.
+    required: false
+    default: []
+    validation: "^[a-zA-Z0-9_-]+$"

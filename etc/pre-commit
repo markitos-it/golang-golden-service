@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+IFS=$'\n\t'
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+TEST_SCRIPT="$ROOT_DIR/bin/appsec/test-all.sh"
+cd "$ROOT_DIR"
+
+if [[ ! -x "$TEST_SCRIPT" ]]; then
+    echo "[ERROR] test script not found or not executable: $TEST_SCRIPT" >&2
+    exit 1
+fi
+
+echo "[INFO] Running repository security checks before commit..."
+"$TEST_SCRIPT"
+EXIT_CODE=$?
+if [[ $EXIT_CODE -ne 0 ]]; then
+    echo "[FAIL] Pre-commit security checks failed (exit code: $EXIT_CODE). Commit aborted." >&2
+    exit $EXIT_CODE
+fi
+
+echo "[PASS] Pre-commit security checks passed. Proceeding with commit."
+exit 0
