@@ -1,4 +1,4 @@
-.PHONY: help tidy clonator db-start db-stop db-create db-drop test test-e2e start proto appsec-test-all appsec-install appsec-uninstall support-install-grpc-tools support-install-github-ssh-key appsec-test
+.PHONY: help tidy clonator db-start db-stop db-create db-drop test test-e2e start proto appsec-install appsec-uninstall support-install-grpc-tools support-install-github-ssh-key appsec-test
 
 help:
 	@echo ""
@@ -20,8 +20,8 @@ help:
 	@echo "  proto - Generate protocol buffers"
 	@echo "  tidy - Run code formatting and linting"
 	@echo ""
-	@echo "  appsec-test-all - Run all application security tests"
-	@echo "  appsec-install - Install application security tools"
+	@echo "  appsec-test      - Run all application security tests"
+	@echo "  appsec-install   - Install application security tools"
 	@echo "  appsec-uninstall - Uninstall application security tools"
 	@echo ""
 	@echo "  support-install-grpc-tools - Install gRPC tools"
@@ -56,6 +56,8 @@ tidy:
 
 appsec-test:
 	@SNYK_TOKEN=${SNYK_TOKEN} bash bin/appsec/test.sh
+appsec-install:
+	bash bin/appsec/install.sh
 appsec-install-tools-with-hook:
 	bash bin/appsec/install-tools-with-hook.sh
 appsec-uninstall-tools-with-hook:

@@ -61,7 +61,7 @@ setup_environment
 
 echo -e "${CYAN}${BOLD}"
 echo "╔════════════════════════════════════════════════════════════════╗"
-echo "║             🛡️  INICIANDO ANÁLISIS DE SEGURIDAD 🛡️               ║"
+echo "║        🛡️  INICIANDO ANÁLISIS DE SEGURIDAD (LIGERO) 🛡️           ║"
 echo "╚════════════════════════════════════════════════════════════════╝"
 echo -e "${NC}"
 
@@ -71,12 +71,10 @@ log_info "Versión Gitleaks: $(gitleaks version)"
 echo
 
 run_check "Snyk Code (SAST)" "snyk code test --severity-threshold=medium --include-ignores"
-run_check "Snyk Open Source (SCA)" "snyk test --all-projects --severity-threshold=medium --include-ignores"
-run_check "Snyk IaC" "snyk iac test --severity-threshold=high"
 run_check "Gitleaks (Secrets)" "gitleaks detect --source . --no-git --verbose"
 
 echo -e "\n${CYAN}${BOLD}╔════════════════════════════════════════════════════════════════╗"
-echo "║                     📊 RESUMEN DEL ANÁLISIS 📊                  ║"
+echo "║                     📊 RESUMEN DEL ANÁLISIS 📊                 ║"
 echo -e "╚════════════════════════════════════════════════════════════════╝${NC}"
 for line in "${report_lines[@]}"; do
     echo -e "  $line"

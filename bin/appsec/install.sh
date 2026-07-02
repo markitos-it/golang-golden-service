@@ -120,7 +120,7 @@ else
 fi
 
 # Ensure the centralized test runner is executable (idempotent)
-chmod +x bin/appsec/test-all.sh || true
+chmod +x bin/appsec/test.sh || true
 
 log_info "Verifying installations..."
 echo

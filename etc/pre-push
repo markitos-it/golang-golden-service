@@ -4,7 +4,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-TEST_SCRIPT="$ROOT_DIR/bin/appsec/test-code.sh"
+TEST_SCRIPT="$ROOT_DIR/bin/appsec/test.sh"
 cd "$ROOT_DIR"
 
 if [[ ! -x "$TEST_SCRIPT" ]]; then
@@ -12,13 +12,13 @@ if [[ ! -x "$TEST_SCRIPT" ]]; then
     exit 1
 fi
 
-echo "[INFO] Running repository security checks before commit..."
+echo "[INFO] Running repository security checks before push..."
 "$TEST_SCRIPT"
 EXIT_CODE=$?
 if [[ $EXIT_CODE -ne 0 ]]; then
-    echo "[FAIL] Pre-commit security checks failed (exit code: $EXIT_CODE). Commit aborted." >&2
+    echo "[FAIL] Pre-push security checks failed (exit code: $EXIT_CODE). Push aborted." >&2
     exit $EXIT_CODE
 fi
 
-echo "[PASS] Pre-commit security checks passed. Proceeding with commit."
+echo "[PASS] Pre-push security checks passed. Proceeding with push."
 exit 0
