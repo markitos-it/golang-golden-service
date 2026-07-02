@@ -1,117 +1,135 @@
-<h1 align="center">
-  <br>
-  <img src="https://go.dev/blog/go-brand/Go-Logo/PNG/Go-Logo_Blue.png" alt="Go Logo" width="150">
-  <br>
-  🟡 markitos-it-service-golden
-  <br>
-</h1>
+# Golden Service
 
-<h4 align="center">A production-ready, highly opinionated Go 1.26 gRPC microservice template for Markitos IT.</h4>
+This project is a "Golden Path" service written in Go. It provides a template for creating new microservices with a focus on best practices, including a clean architecture, gRPC API, and a complete development environment.
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Go-1.26-00ADD8?style=flat-square&logo=go" alt="Go Version">
-  <img src="https://img.shields.io/badge/gRPC-v1.60+-244c5a?style=flat-square&logo=google" alt="gRPC Version">
-  <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker" alt="Docker Ready">
-</p>
+## Features
 
-<p align="center">
-  <a href="#-about-the-project">About</a> •
-  <a href="#-key-features">Features</a> •
-  <a href="#-getting-started">Getting Started</a> •
-  <a href="#-environment-variables">Environment Variables</a> •
-  <a href="#-docker">Docker</a>
-</p>
+*   **gRPC API:** Exposes a gRPC API with server reflection enabled for easy discovery and testing.
+*   **PostgreSQL Integration:** Uses GORM for database integration with a PostgreSQL database.
+*   **Configuration Management:** Manages configuration using Viper, loading from environment variables or a local `app.env` file.
+*   **Project Scaffolding:** Includes a `clonator` CLI tool to generate new services from this template.
+*   **Makefile-driven Workflow:** Simplifies common development tasks like running, testing, and database management.
+*   **Dockerized Environment:** Provides a Docker Compose setup for running a local PostgreSQL database.
 
----
+## Prerequisites
 
-## 📖 About The Project
+Before you begin, ensure you have the following installed:
 
-**markitos-it-service-golden** is the foundational template ("Golden Service") for all new gRPC microservices. It allows developers to bypass the boilerplate setup and immediately start writing business logic. 
+*   [Go](https://golang.org/doc/install) (version 1.22 or newer)
+*   [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
+*   [Make](https://www.gnu.org/software/make/)
+*   [`grpcurl`](https://github.com/fullstorydev/grpcurl) for interacting with the gRPC API.
 
-Built on **Go 1.26**, this service implements industry best practices, including a highly optimized multi-stage Docker build utilizing Alpine and Distroless for a minimal footprint and maximum security.
+## Getting Started
 
-## ✨ Key Features
+Follow these steps to get the service up and running.
 
-*   **Go 1.26**: Leveraging the latest standard library features.
-*   **gRPC & Protobuf**: High-performance, strongly-typed remote procedure calls.
-*   **Self-Sufficient Binary**: Compiled with `CGO_ENABLED=0` for maximum portability without external dependencies.
-*   **Distroless Docker Image**: Uses `gcr.io/distroless/static-debian12` for an ultra-secure, minimal production environment.
+### 1. Clone the Repository
 
-## 🚀 Create a New Service (Clone)
-
-You can quickly generate a new microservice based on this template (*Golden Service*) using our interactive Go CLI tool, **Clonator**.
-
-```bash
-make clonator
+```sh
+git clone https://github.com/your-username/markitos-it-svc-golden.git
+cd markitos-it-svc-golden
 ```
 
-This will start a local server. Open your browser and navigate to http://localhost:8080.
-There you will find an intuitive form where you can fill in:
-- **Entity Singular:** (e.g., `user`) - Lowercase letters only.
-- **Entity Plural:** (e.g., `users`) - Lowercase letters only.
-- **Service Name:** (e.g., `markitos-it-service-users`) - Kebab-case format.
+### 2. Start the Database
 
-After filling in the details, you will see a confirmation screen. Upon acceptance, the tool will automatically clone, clean, and configure the new project for you. 😎
+This command uses Docker Compose to start a PostgreSQL container.
 
-### Option 2: Interactive CLI 💻
-
-If you prefer to perform the process directly from your terminal, you can run the interactive wizard:
-
-```bash
-make clone
+```sh
+make db-start
+make db-create
 ```
 
-The Bash script will guide you by asking for the required values step by step. It also supports parameter injection via environment variables (`MDK_CLONE_ENTITY_SINGULAR`, `MDK_CLONE_ENTITY_PLURAL`, `MDK_CLONE_TARGET_SERVICE_NAME`) for use in automated CI/CD processes.
+### 3. Run the Application
 
-## 🚀 Getting Started
+This command will start the gRPC server.
 
-### Prerequisites
-
-*   Go >= 1.26
-*   Docker
-
-### Local Development
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/markitos-it/markitos-it-service-golden.git
-   cd markitos-it-service-golden
-   ```
-
-2. Download dependencies:
-   ```bash
-   go mod download
-   ```
-
-3. Run the service:
-   ```bash
-   go run cmd/app/main.go
-   ```
-
-## ⚙️ Environment Variables
-
-You can configure the application using the following environment variables. The variables below are the default values, which can be overridden at runtime:
-
-| Variable | Default Value | Description |
-| :--- | :--- | :--- |
-| `DATABASE_DSN` | `host=localhost user=admin password=admin dbname=markitos-it-svc-golden sslmode=disable` | Database connection string |
-| `GRPC_SERVER_ADDRESS` | `:30000` | Address and port where the gRPC server will listen |
-
-## 🐳 Docker
-
-The project includes a highly optimized, multi-stage Dockerfile ready for production.
-
-### Build the image
-```bash
-docker build -t markitos-it-svc-golden:1.0.0 .
+```sh
+make start
 ```
 
-### Run the container
-```bash
-docker run -p 3000:3000 -p 30000:30000 \
-  -e DATABASE_DSN="host=db user=admin password=admin dbname=markitos-it-svc-golden sslmode=disable" \
-  -e GRPC_SERVER_ADDRESS=":30000" \
-  markitos-it-svc-golden:1.0.0
+The server will be listening on the address specified in your configuration (default is `localhost:50051`).
+
+## Usage
+
+### Running the Service
+
+To start the gRPC server:
+
+```sh
+make start
 ```
 
-*gRPC API will be available at `localhost:30000`*
+### Running Tests
+
+Run all unit tests:
+
+```sh
+make test
+```
+
+Run end-to-end tests using `grpcurl`:
+
+```sh
+make test-e2e
+```
+
+### Database Management
+
+The `Makefile` provides commands to manage the PostgreSQL database container:
+
+*   **Start the database:** `make db-start`
+*   **Stop the database:** `make db-stop`
+*   **Create the database:** `make db-create` (Note: The database is created automatically on the first run)
+*   **Drop the database:** `make db-drop`
+
+### Protocol Buffers
+
+To regenerate the gRPC code from the `.proto` file:
+
+```sh
+make proto
+```
+
+## API
+
+The service exposes a gRPC API defined in the Protocol Buffers file located at `internal/infrastructure/proto/app.proto`. With the server running and reflection enabled, you can explore the available services and methods using `grpcurl`.
+
+**List Services:**
+
+```sh
+grpcurl -plaintext localhost:50051 list
+```
+
+**Describe a Service:**
+
+```sh
+grpcurl -plaintext localhost:50051 describe .goldenservice.Goldenservice
+```
+
+## Project Structure
+
+The project follows a standard Go project layout:
+
+*   `bin/`: Shell scripts for common tasks (starting, testing, etc.).
+*   `cmd/`: Main application entry points.
+    *   `app/`: The main gRPC service application.
+    *   `clonator/`: A CLI tool for scaffolding new projects from this template.
+*   `etc/`: Configuration files, including `docker-compose.yaml`.
+*   `internal/`: Private application and library code.
+    *   `domain/`: Core business logic, models, and services.
+    *   `infrastructure/`: Components that interact with external systems (database, gRPC server).
+*   `Makefile`: Defines and automates common development workflows.
+
+## Configuration
+
+The application is configured using a combination of a configuration file and environment variables.
+
+*   A default configuration file `app.env` can be created in the root directory.
+*   Environment variables can be used to override the values in the file.
+
+The `main.go` file loads the configuration at startup. Refer to `internal/infrastructure/configuration/config.go` for all available configuration options.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
