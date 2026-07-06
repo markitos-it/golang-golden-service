@@ -19,10 +19,20 @@ Before you begin, ensure you have the following installed:
 *   [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
 *   [Make](https://www.gnu.org/software/make/)
 *   [`grpcurl`](https://github.com/fullstorydev/grpcurl) for interacting with the gRPC API.
+*   Git Hooks Tools: For automated code quality and security checks.
 
 ## Getting Started
 
 Follow these steps to get the service up and running.
+
+### 0. Setup Git Hooks (Highly Recommended)
+
+This project uses native Git hooks to automate code quality checks, formatting, and security scanning before you commit and push your code. This ensures consistency and prevents common errors from reaching the repository.
+
+To set them up, please follow the detailed instructions in the guide:
+
+**➡️ [Git Hooks Installation Guide](etc/git-hooks-appsec.md)**
+
 
 ### 1. Clone the Repository
 
