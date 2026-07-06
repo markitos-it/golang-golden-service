@@ -1,0 +1,51 @@
+linters:
+  disable-all: false
+  enable:
+    - errcheck
+    - gocritic
+    - staticcheck
+
+linters-settings:
+  errcheck:
+    # 1. Ignora de raíz las funciones específicas que no quieres comprobar
+    exclude-functions:
+      - fmt.Scanln
+      - fmt.Printf
+      - fmt.Println
+      - (*github.com/spf13/viper.Viper).BindEnv
+      - github.com/spf13/viper.BindEnv
+      - os.WriteFile
+      - os.MkdirAll
+      - path/filepath.Walk
+      - crypto/rand.Read
+      - math/rand.Read
+      # Métodos de librerías externas o generadas (Cobra, Survey, Gorm)
+      - (*github.com/spf13/cobra.Command).Help
+      - github.com/AlecAivazis/survey/v2.Ask
+      - github.com/AlecAivazis/survey/v2.AskOne
+      - (*gorm.io/gorm.DB).AutoMigrate
+
+issues:
+  exclude-rules:
+    # 2. Desactiva gocritic en la carpeta cmd si te molestan los ifElseChain
+    - path: cmd/
+      linters:
+        - gocritic
+      text: "ifElseChain"
+
+    # 3. Ignorar por completo el formateo de comentarios molestos en configs
+    - path: internal/infrastructure/configuration/
+      linters:
+        - gocritic
+      text: "commentFormatting"
+
+    # 4. Silenciar advertencias de código deprecated (SA1019) en los archivos de test
+    - path: _test\.go
+      linters:
+        - staticcheck
+      text: "SA1019"
+
+    # 5. Omitir errcheck en toda la suite de pruebas o utilidades de testing
+    - path: internal/testsuite/
+      linters:
+        - errcheck

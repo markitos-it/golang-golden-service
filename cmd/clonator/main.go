@@ -168,23 +168,35 @@ var cloneCmd = &cobra.Command{
 			fmt.Println("📦 Downloading Faker dependencies for tests...")
 			getCmd := exec.Command("go", "get", "github.com/brianvoe/gofakeit/v6")
 			getCmd.Dir = targetDir
-			getCmd.Run()
+			if err := getCmd.Run(); err != nil {
+				fmt.Printf("❌ Error downloading Faker dependencies: %v\n", err)
+				os.Exit(1)
+			}
 		}
 
 		fmt.Println("🧹 Formatting code...")
 		fmtCmd := exec.Command("go", "fmt", "./...")
 		fmtCmd.Dir = targetDir
-		fmtCmd.Run()
+		if err := fmtCmd.Run(); err != nil {
+			fmt.Printf("❌ Error formatting code: %v\n", err)
+			os.Exit(1)
+		}
 
 		fmt.Println("🛠️ Tidying modules...")
 		tidyCmd := exec.Command("go", "mod", "tidy")
 		tidyCmd.Dir = targetDir
-		tidyCmd.Run()
+		if err := tidyCmd.Run(); err != nil {
+			fmt.Printf("❌ Error tidying modules: %v\n", err)
+			os.Exit(1)
+		}
 
 		fmt.Println("⚙️ Generating Protobuf files...")
 		protoCmd := exec.Command("make", "proto")
 		protoCmd.Dir = targetDir
-		protoCmd.Run()
+		if err := protoCmd.Run(); err != nil {
+			fmt.Printf("❌ Error generating Protobuf files: %v\n", err)
+			os.Exit(1)
+		}
 
 		fmt.Println("✅ Project successfully cloned and configured using Clonator!")
 	},
@@ -285,8 +297,7 @@ func main() {
 func generateCustomFields(targetDir string, fields []Field) {
 	var structFields, constructorParams, voInstantiations, structAssignments []string
 	var testGoldenDefaults, protoFields, mapperToProto, mapperToDomain []string
-	var requestArgs, simpleStructFields, responseAssignments []string
-	var testStructAssignments, requiredTestStructAssignments []string
+	var requestArgs, simpleStructFields, responseAssignments, testStructAssignments []string
 	var sqlColumns []string
 	var e2eCreateFields, e2eUpdateFields []string
 	var foundDomainMapper, foundProtoMapper, foundSql bool
@@ -353,9 +364,6 @@ func generateCustomFields(targetDir string, fields []Field) {
 		}
 		testGoldenDefaults = append(testGoldenDefaults, testDefVal)
 		testStructAssignments = append(testStructAssignments, fmt.Sprintf("\t\t%s: %s,", titleNoSpace, testDefVal))
-		if f.Required {
-			requiredTestStructAssignments = append(requiredTestStructAssignments, fmt.Sprintf("\t\t%s: %s,", titleNoSpace, testDefVal))
-		}
 
 		e2eValCreate := `"test_` + strings.ToLower(titleNoSpace) + `"`
 		e2eValUpdate := `\"test_` + strings.ToLower(titleNoSpace) + `_mod\"`

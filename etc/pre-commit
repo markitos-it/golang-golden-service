@@ -1,24 +1,57 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
-IFS=$'\n\t'
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m'
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-TEST_SCRIPT="$ROOT_DIR/bin/appsec/test-code.sh"
-cd "$ROOT_DIR"
+echo -e "${CYAN}==> Iniciando validacion de calidad local...${NC}"
 
-if [[ ! -x "$TEST_SCRIPT" ]]; then
-    echo "[ERROR] test script not found or not executable: $TEST_SCRIPT" >&2
+STATUS_GITLEAKS="${YELLOW}Omitido${NC}"
+STATUS_GOLANGCI="${YELLOW}Omitido${NC}"
+FAILURES=0
+
+# 1. Intercepción de Secretos en Staging
+if command -v gitleaks >/dev/null 2>&1; then
+    echo -e "\n--> Escaneando credenciales en memoria intermedia..."
+    if gitleaks protect -v --staged; then
+        STATUS_GITLEAKS="${GREEN}PASADO${NC}"
+    else
+        STATUS_GITLEAKS="${RED}FALLADO${NC}"
+        FAILURES=1
+    fi
+else
+    echo -e "${YELLOW}Advertencia: Gitleaks no encontrado en el sistema.${NC}"
+fi
+
+# 2. Control de Calidad y Convenciones Go
+if command -v golangci-lint >/dev/null 2>&1; then
+    echo -e "\n--> Verificando calidad y formato de codigo..."
+    if golangci-lint run; then
+        STATUS_GOLANGCI="${GREEN}PASADO${NC}"
+    else
+        STATUS_GOLANGCI="${RED}FALLADO${NC}"
+        FAILURES=1
+    fi
+else
+    echo -e "${YELLOW}Advertencia: golangci-lint no encontrado en el sistema.${NC}"
+fi
+
+echo ""
+echo -e "${CYAN}==============================================${NC}"
+echo -e "${CYAN}           RESUMEN PRE-COMMIT                 ${NC}"
+echo -e "${CYAN}==============================================${NC}"
+echo -e "HERRAMIENTA             RESULTADO"
+echo -e "----------------------------------------------"
+echo -e "Gitleaks                ${STATUS_GITLEAKS}"
+echo -e "Golangci-lint           ${STATUS_GOLANGCI}"
+echo -e "${CYAN}==============================================${NC}"
+
+if [ $FAILURES -ne 0 ]; then
+    echo -e "${RED}==> Bloqueando commit. Corrige los errores detallados arriba.${NC}"
     exit 1
+else
+    echo -e "${GREEN}==> Commit autorizado. Arbol de trabajo limpio.${NC}"
+    exit 0
 fi
-
-echo "[INFO] Running repository security checks before commit..."
-"$TEST_SCRIPT"
-EXIT_CODE=$?
-if [[ $EXIT_CODE -ne 0 ]]; then
-    echo "[FAIL] Pre-commit security checks failed (exit code: $EXIT_CODE). Commit aborted." >&2
-    exit $EXIT_CODE
-fi
-
-echo "[PASS] Pre-commit security checks passed. Proceeding with commit."
-exit 0

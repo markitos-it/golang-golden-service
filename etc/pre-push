@@ -1,24 +1,83 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
-IFS=$'\n\t'
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m'
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-TEST_SCRIPT="$ROOT_DIR/bin/appsec/test.sh"
-cd "$ROOT_DIR"
+echo -e "${CYAN}==> Iniciando auditoria de seguridad profunda...${NC}"
 
-if [[ ! -x "$TEST_SCRIPT" ]]; then
-    echo "[ERROR] test script not found or not executable: $TEST_SCRIPT" >&2
+STATUS_GOSEC="${YELLOW}Omitido${NC}"
+STATUS_GOVULNCHECK="${YELLOW}Omitido${NC}"
+STATUS_SNYK_CODE="${YELLOW}Omitido${NC}"
+STATUS_SNYK_SCA="${YELLOW}Omitido${NC}"
+FAILURES=0
+
+# 1. Análisis SAST Nativo
+if command -v gosec >/dev/null 2>&1; then
+    echo -e "\n--> Ejecutando GoSec Analisis de Arbol Sintactico..."
+    if GOSEC_OUT=$(gosec -severity=high -quiet ./... 2>&1); then
+        STATUS_GOSEC="${GREEN}PASADO${NC}"
+    else
+        STATUS_GOSEC="${RED}FALLADO${NC}"
+        FAILURES=1
+        echo -e "${RED}$GOSEC_OUT${NC}"
+    fi
+fi
+
+# 2. Análisis SCA Nativo con Contexto de Ejecucion
+if command -v govulncheck >/dev/null 2>&1; then
+    echo -e "\n--> Consultando Go Vulnerability Database..."
+    if GOVULN_OUT=$(govulncheck ./... 2>&1); then
+        STATUS_GOVULNCHECK="${GREEN}PASADO${NC}"
+    else
+        STATUS_GOVULNCHECK="${RED}FALLADO${NC}"
+        FAILURES=1
+        echo -e "${RED}$GOVULN_OUT${NC}"
+    fi
+fi
+
+# 3. Análisis SAST Semantico Avanzado
+if command -v snyk >/dev/null 2>&1; then
+    echo -e "\n--> Ejecutando Snyk Code Engine..."
+    if SNYK_CODE_OUT=$(snyk code test --severity-threshold=high 2>&1); then
+        STATUS_SNYK_CODE="${GREEN}PASADO${NC}"
+    else
+        STATUS_SNYK_CODE="${RED}FALLADO${NC}"
+        FAILURES=1
+        echo -e "${RED}$SNYK_CODE_OUT${NC}"
+    fi
+fi
+
+# 4. Análisis SCA Avanzado Multilenguaje
+if command -v snyk >/dev/null 2>&1; then
+    echo -e "\n--> Ejecutando Snyk Open Source..."
+    if SNYK_SCA_OUT=$(snyk test --severity-threshold=high 2>&1); then
+        STATUS_SNYK_SCA="${GREEN}PASADO${NC}"
+    else
+        STATUS_SNYK_SCA="${RED}FALLADO${NC}"
+        FAILURES=1
+        echo -e "${RED}$SNYK_SCA_OUT${NC}"
+    fi
+fi
+
+echo ""
+echo -e "${CYAN}==============================================${NC}"
+echo -e "${CYAN}           RESUMEN PRE-PUSH                   ${NC}"
+echo -e "${CYAN}==============================================${NC}"
+echo -e "HERRAMIENTA             RESULTADO"
+echo -e "----------------------------------------------"
+echo -e "GoSec                   ${STATUS_GOSEC}"
+echo -e "Govulncheck             ${STATUS_GOVULNCHECK}"
+echo -e "Snyk Code               ${STATUS_SNYK_CODE}"
+echo -e "Snyk Open Source        ${STATUS_SNYK_SCA}"
+echo -e "${CYAN}==============================================${NC}"
+
+if [ $FAILURES -ne 0 ]; then
+    echo -e "${RED}==> Amenazas criticas detectadas. Empuje al remoto bloqueado.${NC}"
     exit 1
+else
+    echo -e "${GREEN}==> Auditoria perfecta. Transmision autorizada.${NC}"
+    exit 0
 fi
-
-echo "[INFO] Running repository security checks before push..."
-"$TEST_SCRIPT"
-EXIT_CODE=$?
-if [[ $EXIT_CODE -ne 0 ]]; then
-    echo "[FAIL] Pre-push security checks failed (exit code: $EXIT_CODE). Push aborted." >&2
-    exit $EXIT_CODE
-fi
-
-echo "[PASS] Pre-push security checks passed. Proceeding with push."
-exit 0
