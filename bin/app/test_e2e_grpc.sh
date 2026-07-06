@@ -11,6 +11,11 @@ SERVICE="golden.Goldenservice"
 
 echo "🚀 Iniciando Test E2E gRPC para $SERVICE en $SERVER..."
 
+# Variables para guardar los IDs de los eventos
+CREATED_ID=""
+UPDATED_ID=""
+DELETED_ID=""
+
 UPLOADS_DIR=${GOLDEN_UPLOADS_BASEDIR:-./uploads}
 mkdir -p $UPLOADS_DIR
 
@@ -49,6 +54,7 @@ if [ -z "$GOLDEN_ID" ] || [ "$GOLDEN_ID" == "null" ]; then
     exit 1
 fi
 echo "✅ Creado exitosamente con ID: $GOLDEN_ID"
+CREATED_ID=$GOLDEN_ID
 echo "--------------------------------------------------"
 
 echo "2️⃣  Obteniendo Golden por ID..."
@@ -68,6 +74,7 @@ UPDATE_PAYLOAD="${UPDATE_PAYLOAD//$PLACEHOLDER_UPDATE/}"
 
 echo "🔍 Payload enviado: $UPDATE_PAYLOAD"
 grpcurl -plaintext -d "$UPDATE_PAYLOAD" $SERVER $SERVICE/UpdateGolden
+UPDATED_ID=$GOLDEN_ID
 echo "✅ Update exitoso."
 echo "--------------------------------------------------"
 
@@ -78,6 +85,7 @@ echo "--------------------------------------------------"
 
 echo "5️⃣  Borrando Golden..."
 grpcurl -plaintext -d "{\"id\": \"$GOLDEN_ID\"}" $SERVER $SERVICE/DeleteGolden
+DELETED_ID=$GOLDEN_ID
 echo "✅ Delete exitoso."
 echo "--------------------------------------------------"
 
@@ -96,3 +104,20 @@ fi
 
 echo "--------------------------------------------------"
 echo "🎉 ¡Todos los tests E2E pasaron exitosamente!"
+echo "--------------------------------------------------"
+
+echo "📋 Resumen de IDs de eventos:"
+echo "--------------------------------------------------"
+echo "ID de Registro Creado:   $CREATED_ID"
+echo "ID de Registro Editado:  $UPDATED_ID"
+echo "ID de Registro Borrado:  $DELETED_ID"
+echo "--------------------------------------------------"
+
+echo "🧹 Limpiando eventos de prueba de la base de datos..."
+if [ -n "$CREATED_ID" ]; then
+    docker exec -i markitos-it-svc-golden-postgres psql -U markitos_it_svc_golden -d markitos_it_svc_golden -c "DELETE FROM golden_events WHERE entity_id = '$CREATED_ID' AND entity_name = 'golden';"
+    echo "✅ Limpieza de eventos completada."
+else
+    echo "⚠️  No se encontró un ID para limpiar, se omite el paso."
+fi
+echo "--------------------------------------------------"
