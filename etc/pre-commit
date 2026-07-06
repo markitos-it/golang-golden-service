@@ -10,9 +10,9 @@ echo -e "${CYAN}==> Iniciando validacion de calidad local...${NC}"
 
 STATUS_GITLEAKS="${YELLOW}Omitido${NC}"
 STATUS_GOLANGCI="${YELLOW}Omitido${NC}"
+STATUS_GOFMT="${YELLOW}Omitido${NC}"
 FAILURES=0
 
-# 1. Intercepción de Secretos en Staging
 if command -v gitleaks >/dev/null 2>&1; then
     echo -e "\n--> Escaneando credenciales en memoria intermedia..."
     if gitleaks protect -v --staged; then
@@ -25,7 +25,6 @@ else
     echo -e "${YELLOW}Advertencia: Gitleaks no encontrado en el sistema.${NC}"
 fi
 
-# 2. Control de Calidad y Convenciones Go
 if command -v golangci-lint >/dev/null 2>&1; then
     echo -e "\n--> Verificando calidad y formato de codigo..."
     if golangci-lint run; then
@@ -38,6 +37,21 @@ else
     echo -e "${YELLOW}Advertencia: golangci-lint no encontrado en el sistema.${NC}"
 fi
 
+echo -e "\n--> Comprobando formato de código Go..."
+GO_FILES=$(find . -name "*.go" -not -path "./vendor/*")
+UNFORMATTED_FILES=$(gofmt -l $GO_FILES)
+
+if [ -n "$UNFORMATTED_FILES" ]; then
+    echo -e "${RED}Error: Los siguientes ficheros no están formateados:${NC}"
+    echo "$UNFORMATTED_FILES"
+    echo -e "${YELLOW}Ejecutando 'gofmt -w' para corregirlos...${NC}"
+    gofmt -w $UNFORMATTED_FILES
+    STATUS_GOFMT="${RED}FALLADO (Corregido)${NC}"
+    FAILURES=1
+else
+    STATUS_GOFMT="${GREEN}PASADO${NC}"
+fi
+
 echo ""
 echo -e "${CYAN}==============================================${NC}"
 echo -e "${CYAN}           RESUMEN PRE-COMMIT                 ${NC}"
@@ -46,6 +60,7 @@ echo -e "HERRAMIENTA             RESULTADO"
 echo -e "----------------------------------------------"
 echo -e "Gitleaks                ${STATUS_GITLEAKS}"
 echo -e "Golangci-lint           ${STATUS_GOLANGCI}"
+echo -e "Go Format               ${STATUS_GOFMT}"
 echo -e "${CYAN}==============================================${NC}"
 
 if [ $FAILURES -ne 0 ]; then

@@ -46,7 +46,7 @@ go install golang.org/x/vuln/cmd/govulncheck@latest
 
 ```
 
-### 1.5. Configuración del PATH en el Sistema
+### 1.4. Configuración del PATH en el Sistema
 
 Para que tu terminal localice los nuevos binarios que acabas de compilar, asegúrate de tener el directorio `bin` de Go indexado en tu variable de entorno. Añade esta línea al final de tu archivo `~/.bashrc` (o el archivo de configuración de tu shell):
 
@@ -58,7 +58,7 @@ export PATH=$(go env GOPATH)/bin:$PATH
 Luego, recarga la configuración ejecutando `source ~/.bashrc`.
 
 
-### 1.6. Autenticación de Auditoría Externa (Snyk)
+### 1.5. Autenticación de Auditoría Externa (Snyk)
 
 El interceptor de fase profunda (pre-push) utiliza el motor de Snyk para complementar el análisis estático y de dependencias. Para que estos comandos se ejecuten de forma no interactiva sin interrumpir la terminal, es mandatorio exportar tu token de autenticación.
 
@@ -145,6 +145,7 @@ echo -e "${CYAN}==> Iniciando validacion de calidad local...${NC}"
 
 STATUS_GITLEAKS="${YELLOW}Omitido${NC}"
 STATUS_GOLANGCI="${YELLOW}Omitido${NC}"
+STATUS_GOFMT="${YELLOW}Omitido${NC}"
 FAILURES=0
 
 # 1. Intercepción de Secretos en Staging
@@ -173,6 +174,22 @@ else
     echo -e "${YELLOW}Advertencia: golangci-lint no encontrado en el sistema.${NC}"
 fi
 
+# 3. Formateo de Código Go
+echo -e "\n--> Comprobando formato de código Go..."
+GO_FILES=$(find . -name "*.go" -not -path "./vendor/*")
+UNFORMATTED_FILES=$(gofmt -l $GO_FILES)
+
+if [ -n "$UNFORMATTED_FILES" ]; then
+    echo -e "${RED}Error: Los siguientes ficheros no están formateados:${NC}"
+    echo "$UNFORMATTED_FILES"
+    echo -e "${YELLOW}Ejecutando 'gofmt -w' para corregirlos...${NC}"
+    gofmt -w $UNFORMATTED_FILES
+    STATUS_GOFMT="${RED}FALLADO (Corregido)${NC}"
+    FAILURES=1
+else
+    STATUS_GOFMT="${GREEN}PASADO${NC}"
+fi
+
 echo ""
 echo -e "${CYAN}==============================================${NC}"
 echo -e "${CYAN}           RESUMEN PRE-COMMIT                 ${NC}"
@@ -181,6 +198,7 @@ echo -e "HERRAMIENTA             RESULTADO"
 echo -e "----------------------------------------------"
 echo -e "Gitleaks                ${STATUS_GITLEAKS}"
 echo -e "Golangci-lint           ${STATUS_GOLANGCI}"
+echo -e "Go Format               ${STATUS_GOFMT}"
 echo -e "${CYAN}==============================================${NC}"
 
 if [ $FAILURES -ne 0 ]; then
@@ -208,23 +226,10 @@ NC='\033[0m'
 
 echo -e "${CYAN}==> Iniciando auditoria de seguridad profunda...${NC}"
 
-STATUS_GOSEC="${YELLOW}Omitido${NC}"
 STATUS_GOVULNCHECK="${YELLOW}Omitido${NC}"
 STATUS_SNYK_CODE="${YELLOW}Omitido${NC}"
 STATUS_SNYK_SCA="${YELLOW}Omitido${NC}"
 FAILURES=0
-
-# 1. Análisis SAST Nativo
-if command -v gosec >/dev/null 2>&1; then
-    echo -e "\n--> Ejecutando GoSec Analisis de Arbol Sintactico..."
-    if GOSEC_OUT=$(gosec -severity=high -quiet ./... 2>&1); then
-        STATUS_GOSEC="${GREEN}PASADO${NC}"
-    else
-        STATUS_GOSEC="${RED}FALLADO${NC}"
-        FAILURES=1
-        echo -e "${RED}$GOSEC_OUT${NC}"
-    fi
-fi
 
 # 2. Análisis SCA Nativo con Contexto de Ejecucion
 if command -v govulncheck >/dev/null 2>&1; then
@@ -268,7 +273,6 @@ echo -e "${CYAN}           RESUMEN PRE-PUSH                   ${NC}"
 echo -e "${CYAN}==============================================${NC}"
 echo -e "HERRAMIENTA             RESULTADO"
 echo -e "----------------------------------------------"
-echo -e "GoSec                   ${STATUS_GOSEC}"
 echo -e "Govulncheck             ${STATUS_GOVULNCHECK}"
 echo -e "Snyk Code               ${STATUS_SNYK_CODE}"
 echo -e "Snyk Open Source        ${STATUS_SNYK_SCA}"

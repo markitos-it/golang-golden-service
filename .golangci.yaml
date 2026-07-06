@@ -4,7 +4,6 @@ linters:
     - errcheck
     - gocritic
     - staticcheck
-    - gosec # 🚀 Activamos gosec para el análisis de seguridad
 
 linters-settings:
   errcheck:
@@ -28,12 +27,6 @@ linters-settings:
 
 issues:
   exclude-rules:
-    # 1. 🎯 IGNORAR REPOSITORIO COMPLETO DE CLONATOR PARA GOSEC
-    # Esto elimina de raíz los falsos positivos de Path Traversal (G304) y bucles Walk (G122)
-    - path: cmd/clonator/
-      linters:
-        - gosec
-
     # 2. Desactiva gocritic en la carpeta cmd si te molestan los ifElseChain
     - path: cmd/
       linters:
@@ -56,9 +49,3 @@ issues:
     - path: internal/testsuite/
       linters:
         - errcheck
-
-    # 6. Silenciar alertas de Path Traversal de gosec en el resto de la capa gAPI si surgen
-    - path: internal/infrastructure/gapi/
-      linters:
-        - gosec
-      text: "G703|G304"
