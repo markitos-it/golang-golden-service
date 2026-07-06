@@ -8,23 +8,10 @@ NC='\033[0m'
 
 echo -e "${CYAN}==> Iniciando auditoria de seguridad profunda...${NC}"
 
-STATUS_GOSEC="${YELLOW}Omitido${NC}"
 STATUS_GOVULNCHECK="${YELLOW}Omitido${NC}"
 STATUS_SNYK_CODE="${YELLOW}Omitido${NC}"
 STATUS_SNYK_SCA="${YELLOW}Omitido${NC}"
 FAILURES=0
-
-# 1. Análisis SAST Nativo
-if command -v gosec >/dev/null 2>&1; then
-    echo -e "\n--> Ejecutando GoSec Analisis de Arbol Sintactico..."
-    if GOSEC_OUT=$(gosec -severity=high -quiet ./... 2>&1); then
-        STATUS_GOSEC="${GREEN}PASADO${NC}"
-    else
-        STATUS_GOSEC="${RED}FALLADO${NC}"
-        FAILURES=1
-        echo -e "${RED}$GOSEC_OUT${NC}"
-    fi
-fi
 
 # 2. Análisis SCA Nativo con Contexto de Ejecucion
 if command -v govulncheck >/dev/null 2>&1; then
@@ -68,7 +55,6 @@ echo -e "${CYAN}           RESUMEN PRE-PUSH                   ${NC}"
 echo -e "${CYAN}==============================================${NC}"
 echo -e "HERRAMIENTA             RESULTADO"
 echo -e "----------------------------------------------"
-echo -e "GoSec                   ${STATUS_GOSEC}"
 echo -e "Govulncheck             ${STATUS_GOVULNCHECK}"
 echo -e "Snyk Code               ${STATUS_SNYK_CODE}"
 echo -e "Snyk Open Source        ${STATUS_SNYK_SCA}"

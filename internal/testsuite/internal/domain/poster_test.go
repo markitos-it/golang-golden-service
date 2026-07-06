@@ -12,7 +12,7 @@ func TestCanCreateValidGoldenPoster(t *testing.T) {
 	tempDir := t.TempDir()
 	testFile := filepath.Join(tempDir, "test.jpg")
 
-	err := os.WriteFile(testFile, []byte("test content"), 0644)
+	err := os.WriteFile(testFile, []byte("test content"), 0600)
 	if err != nil {
 		t.Fatal(err)
 	}

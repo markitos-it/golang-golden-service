@@ -28,7 +28,7 @@ func createTestImageFile(baseDir string) string {
 	os.MkdirAll(baseDir, 0755)
 	filename := shared.UUIDv4() + ".jpg"
 	fullPath := filepath.Join(baseDir, filename)
-	os.WriteFile(fullPath, testImageData, 0644)
+	os.WriteFile(fullPath, testImageData, 0600)
 	return filename
 }
 
