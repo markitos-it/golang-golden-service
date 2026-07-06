@@ -87,6 +87,14 @@ GOBIN=~/.local/bin go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@late
 log_success "Go plugins for gRPC installed successfully."
 #:[.'.]:> -----------------------------------------------------
 
+#:[.'.]:> -----------------------------------------------------
+#:[.'.]:> Instalar cli grpcurl (opcional, útil para pruebas)
+#:[.'.]:> -----------------------------------------------------
+cd /tmp
+curl -sSL https://github.com/fullstorydev/grpcurl/releases/download/v1.8.9/grpcurl_1.8.9_linux_x86_64.tar.gz | tar -xz
+mv grpcurl ~/.local/bin/
+#:[.'.]:> -----------------------------------------------------
+
 
 #:[.'.]:> -----------------------------------------------------
 #:[.'.]:> Actualizar PATH en ~/.bashrc
