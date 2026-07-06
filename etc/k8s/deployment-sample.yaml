@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: markitos-it-svc-golden
+  namespace: default
+  labels:
+    app: markitos-it-svc-golden
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: markitos-it-svc-golden
+  template:
+    metadata:
+      labels:
+        app: markitos-it-svc-golden
+    spec:
+      containers:
+        - name: app
+          image: markitos-it-svc-golden:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 30000
+              name: grpc
+          env:
+            - name: DATABASE_DSN
+              value: "host=markitos-it-svc-golden-postgres user=markitos_it_svc_golden password=markitos_it_svc_golden dbname=markitos_it_svc_golden sslmode=disable"
+            - name: GRPC_SERVER_ADDRESS
+              value: ":30000"
+            - name: GOLDEN_UPLOADS_BASEDIR
+              value: "/uploads"
+          volumeMounts:
+            - name: uploads-volume
+              mountPath: /uploads
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+      volumes:
+        - name: uploads-volume
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: markitos-it-svc-golden-service
+  namespace: default
+  labels:
+    app: markitos-it-svc-golden
+spec:
+  type: ClusterIP
+  ports:
+    - port: 30000
+      targetPort: 30000
+      protocol: TCP
+      name: grpc
+  selector:
+    app: markitos-it-svc-golden
