@@ -30,7 +30,9 @@ func (s *Server) GetGolden(ctx context.Context, in *GetGoldenRequest) (*GetGolde
 	posterData := response.Data.Poster
 	if posterData != "" {
 		baseDir := os.Getenv("GOLDEN_UPLOADS_BASEDIR")
-		filePath := filepath.Join(baseDir, posterData)
+
+		cleanBaseDir := filepath.Clean(baseDir)
+		filePath := filepath.Join(cleanBaseDir, filepath.Base(posterData))
 		if fileBytes, err := os.ReadFile(filePath); err == nil {
 			posterData = base64.StdEncoding.EncodeToString(fileBytes)
 		} else {

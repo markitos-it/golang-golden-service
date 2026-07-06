@@ -74,7 +74,9 @@ func (s *Server) ToProto(domainGolden *model.Golden) *Golden {
 		if baseDir == "" {
 			baseDir = s.config.BaseDir
 		}
-		filePath := filepath.Join(baseDir, posterData)
+
+		cleanBaseDir := filepath.Clean(baseDir)
+		filePath := filepath.Join(cleanBaseDir, filepath.Base(posterData))
 		if fileBytes, err := os.ReadFile(filePath); err == nil {
 			posterData = base64.StdEncoding.EncodeToString(fileBytes)
 		} else {
