@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: markitos-it-svc-golden:latest
+          image: nginx:1.25.2
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 30000
@@ -59,3 +59,41 @@ spec:
       name: grpc
   selector:
     app: markitos-it-svc-golden
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mdk-app
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - devops.markitos.it
+        - app.markitos.it
+      secretName: mdk-app-tls-certs
+  rules:
+    - host: devops.markitos.it
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mdk-app
+                port:
+                  number: 80
+    - host: app.markitos.it
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mdk-app
+                port:
+                  number: 80
