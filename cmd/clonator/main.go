@@ -100,19 +100,35 @@ var cloneCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		// Copiar recursivamente (puedes implementarlo 100% en Go luego si quieres eliminar la dependencia de "cp")
 		cpCmd := exec.Command("cp", "-r", currentDir, targetDir)
 		if err := cpCmd.Run(); err != nil {
 			fmt.Printf("❌ Error copying files: %v\n", err)
 			os.Exit(1)
 		}
 
-		// Limpiar basura del proyecto nuevo
 		os.RemoveAll(filepath.Join(targetDir, ".git"))
-		os.RemoveAll(filepath.Join(targetDir, "cmd", "clonator")) // Se borra a sí mismo
+		os.RemoveAll(filepath.Join(targetDir, "cmd", "clonator"))
+
+		makefile := filepath.Join(targetDir, "Makefile")
+		if content, err := os.ReadFile(makefile); err == nil {
+			strContent := string(content)
+			strContent = strings.Replace(strContent, " clonator", "", 1)
+			clonatorHelp := "\t@echo \"  clonator - Start the interactive Clonator CLI to generate a new service\"\n\t@echo \"\"\n"
+			strContent = strings.Replace(strContent, clonatorHelp, "", 1)
+			clonatorTarget := `clonator:
+	@if [ "$(FILE)" != "" ]; then \
+		go run cmd/clonator/*.go --from-file=$(FILE); \
+	else \
+		go run cmd/clonator/*.go; \
+	fi`
+			strContent = strings.Replace(strContent, clonatorTarget, "", 1)
+			os.WriteFile(makefile, []byte(strContent), 0644)
+		} else {
+			fmt.Printf("⚠️  Warning: Could not read or clean Makefile: %v\n", err)
+		}
+
 		os.Remove(filepath.Join(targetDir, "README.md"))
 
-		// Variables de reemplazo
 		pluralUpper := strings.ToUpper(entityPlural)
 		pluralLower := strings.ToLower(entityPlural)
 		pluralTitle := strings.ToUpper(pluralLower[:1]) + pluralLower[1:]
@@ -259,13 +275,12 @@ func processFromFile(filePath string) {
 		defVal := ""
 		if f.Default != nil {
 			if slice, ok := f.Default.([]interface{}); ok && len(slice) == 0 {
-				defVal = "" // Si el default es un array vacío []
+				defVal = ""
 			} else {
 				defVal = fmt.Sprintf("%v", f.Default)
 			}
 		}
 
-		// Generar un Title bonito (e.g. "my_field" -> "My Field")
 		words := strings.Split(f.Name, "_")
 		for i, w := range words {
 			if len(w) > 0 {
@@ -500,7 +515,6 @@ func generateCustomFields(targetDir string, fields []Field) {
 			foundDomainMapper = true
 		}
 
-		// Agresivo: Reemplazar TODAS las llamadas de assert por require en tests para evitar panics absolutos
 		if strings.HasSuffix(path, "_test.go") && strings.Contains(strContent, "assert.") {
 			strContent = strings.ReplaceAll(strContent, "assert.", "require.")
 			strContent = strings.ReplaceAll(strContent, "\"github.com/stretchr/testify/assert\"", "\"github.com/stretchr/testify/require\"")
@@ -575,7 +589,6 @@ func generateCustomFields(targetDir string, fields []Field) {
 		return nil
 	})
 
-	// Alertas inteligentes si el usuario olvidó las marcas en el Golden template
 	if len(fields) > 0 {
 		if !foundDomainMapper {
 			fmt.Println("\n⚠️  WARNING: '/* ___CUSTOM_FIELDS_TO_DOMAIN___*/' not found in any file!")
