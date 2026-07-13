@@ -64,3 +64,15 @@ func TestCantSearchWithInvalidOptionalPage(t *testing.T) {
 	require.True(t, ok)
 	require.Equal(t, codes.InvalidArgument, st.Code())
 }
+
+func TestCantSearchWithTooLargePageSize(t *testing.T) {
+	_, err := grpcClient.SearchGoldens(ctx, &gapi.SearchGoldensRequest{
+		PageNumber: 1,
+		PageSize:   101,
+	})
+
+	require.Error(t, err)
+	st, ok := status.FromError(err)
+	require.True(t, ok)
+	require.Equal(t, codes.InvalidArgument, st.Code())
+}

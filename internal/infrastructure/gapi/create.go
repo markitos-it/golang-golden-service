@@ -4,8 +4,6 @@ import (
 	context "context"
 	"log"
 	"markitos-it-svc-golden/internal/domain/services"
-
-	"google.golang.org/grpc/status"
 )
 
 func (s *Server) CreateGolden(ctx context.Context, req *CreateGoldenRequest) (*CreateGoldenResponse, error) {
@@ -19,8 +17,8 @@ func (s *Server) CreateGolden(ctx context.Context, req *CreateGoldenRequest) (*C
 	var service services.GoldenCreateService = services.NewGoldenCreateService(s.repository, s.config.BaseDir)
 	entity, err := service.Do(request)
 	if err != nil {
-		log.Printf("❌ ERROR (CreateGolden): %v\n", err)
-		return nil, status.Error(s.GetGRPCCode(err), err.Error())
+		log.Printf("[ERROR] CreateGolden: %v\n", err)
+		return nil, s.ToStatusError(err)
 	}
 
 	return &CreateGoldenResponse{

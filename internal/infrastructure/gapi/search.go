@@ -8,12 +8,14 @@ import (
 	status "google.golang.org/grpc/status"
 )
 
+const maxPageSize int32 = 100
+
 func (s *Server) SearchGoldens(ctx context.Context, in *SearchGoldensRequest) (*SearchGoldensResponse, error) {
 	if in.PageNumber < 1 {
 		return nil, status.Error(codes.InvalidArgument, "invalid page number")
 	}
 
-	if in.PageSize < 1 {
+	if in.PageSize < 1 || in.PageSize > maxPageSize {
 		return nil, status.Error(codes.InvalidArgument, "invalid page size")
 	}
 
@@ -26,7 +28,7 @@ func (s *Server) SearchGoldens(ctx context.Context, in *SearchGoldensRequest) (*
 
 	response, err := service.Do(request)
 	if err != nil {
-		return nil, status.Error(s.GetGRPCCode(err), err.Error())
+		return nil, s.ToStatusError(err)
 	}
 
 	domainGoldens := response.Data

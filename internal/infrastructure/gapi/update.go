@@ -12,7 +12,7 @@ import (
 
 func (s *Server) UpdateGolden(ctx context.Context, in *UpdateGoldenRequest) (*UpdateGoldenResponse, error) {
 	if _, err := types.NewGoldenId(in.Id); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
 	var service services.GoldenUpdateService = services.NewGoldenUpdateService(s.repository, s.config.BaseDir)
@@ -23,8 +23,8 @@ func (s *Server) UpdateGolden(ctx context.Context, in *UpdateGoldenRequest) (*Up
 		PosterData: in.PosterData,
 	}
 	if err := service.Do(request); err != nil {
-		log.Printf("❌ ERROR (UpdateGolden): %v\n", err)
-		return nil, status.Error(s.GetGRPCCode(err), err.Error())
+		log.Printf("[ERROR] UpdateGolden: %v\n", err)
+		return nil, s.ToStatusError(err)
 	}
 
 	return &UpdateGoldenResponse{

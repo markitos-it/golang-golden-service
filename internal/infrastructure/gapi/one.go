@@ -15,7 +15,7 @@ import (
 
 func (s *Server) GetGolden(ctx context.Context, in *GetGoldenRequest) (*GetGoldenResponse, error) {
 	if _, err := types.NewGoldenId(in.Id); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
 	request := services.GoldenOneRequest{Id: in.Id}
@@ -23,16 +23,12 @@ func (s *Server) GetGolden(ctx context.Context, in *GetGoldenRequest) (*GetGolde
 	var service services.GoldenOneService = services.NewGoldenOneService(s.repository)
 	response, err := service.Do(request)
 	if err != nil {
-		return nil, status.Error(s.GetGRPCCode(err), err.Error())
-
+		return nil, s.ToStatusError(err)
 	}
 
 	posterData := response.Data.Poster
 	if posterData != "" {
-		baseDir := os.Getenv("GOLDEN_UPLOADS_BASEDIR")
-
-		cleanBaseDir := filepath.Clean(baseDir)
-		filePath := filepath.Join(cleanBaseDir, filepath.Base(posterData))
+		filePath := filepath.Join(s.uploadsBaseDir(), filepath.Base(posterData))
 		if fileBytes, err := os.ReadFile(filePath); err == nil {
 			posterData = base64.StdEncoding.EncodeToString(fileBytes)
 		} else {
