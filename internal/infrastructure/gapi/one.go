@@ -3,6 +3,7 @@ package gapi
 import (
 	context "context"
 	"encoding/base64"
+	"errors"
 	"log"
 	"markitos-it-svc-golden/internal/domain/services"
 	"markitos-it-svc-golden/internal/domain/shared"
@@ -21,6 +22,9 @@ func (s *Server) GetGolden(ctx context.Context, in *GetGoldenRequest) (*GetGolde
 	var service services.GoldenOneService = services.NewGoldenOneService(s.repository)
 	response, err := service.Do(request)
 	if err != nil {
+		if errors.Is(err, shared.ErrGoldenNotFound) {
+			log.Printf("[WARN] GetGolden: golden not found id=%s", in.Id)
+		}
 		return nil, s.ToStatusError(err)
 	}
 

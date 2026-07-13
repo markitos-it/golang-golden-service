@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	"markitos-it-svc-golden/internal/domain/model"
 	"markitos-it-svc-golden/internal/infrastructure/configuration"
@@ -18,6 +19,7 @@ import (
 	"google.golang.org/grpc/reflection"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	gormlogger "gorm.io/gorm/logger"
 )
 
 var repository model.GoldenRepository
@@ -78,7 +80,17 @@ func loadConfiguration() {
 // #[.'.]:> STEP 3: Create a repository instance with the database connection
 // #[.'.]:> The repository encapsulates all data access logic
 func loadDatabase() {
-	db, err := gorm.Open(postgres.Open(config.DatabaseDsn), &gorm.Config{})
+	gormLog := gormlogger.New(
+		log.New(os.Stdout, "", log.LstdFlags),
+		gormlogger.Config{
+			SlowThreshold:             time.Second,
+			LogLevel:                  gormlogger.Warn,
+			IgnoreRecordNotFoundError: true,
+			Colorful:                  false,
+		},
+	)
+
+	db, err := gorm.Open(postgres.Open(config.DatabaseDsn), &gorm.Config{Logger: gormLog})
 	if err != nil {
 		log.Fatal("['.']:> error unable to connect to database:", err)
 	}

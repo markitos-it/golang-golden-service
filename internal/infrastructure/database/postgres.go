@@ -1,7 +1,9 @@
 package database
 
 import (
+	"errors"
 	"fmt"
+	"log"
 
 	model "markitos-it-svc-golden/internal/domain/model"
 	"markitos-it-svc-golden/internal/domain/shared"
@@ -40,6 +42,9 @@ func (r *GoldenPostgresRepository) Delete(id *types.GoldenId) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
 		var golden model.Golden
 		if err := tx.First(&golden, "id = ?", id.Value()).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				log.Printf("[WARN] repository.Delete: golden not found id=%s", id.Value())
+			}
 			return shared.ErrGoldenNotFound
 		}
 
@@ -79,6 +84,9 @@ func (r *GoldenPostgresRepository) Update(golden *model.Golden) error {
 func (r *GoldenPostgresRepository) One(id *types.GoldenId) (*model.Golden, error) {
 	var golden model.Golden
 	if err := r.db.First(&golden, "id = ?", id.Value()).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Printf("[WARN] repository.One: golden not found id=%s", id.Value())
+		}
 		return nil, shared.ErrGoldenNotFound
 	}
 	return &golden, nil
