@@ -156,7 +156,7 @@ func runGRPCServer(ctx context.Context) error {
 		return err
 	}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(gapi.UnaryLoggingInterceptor()))
 	server := gapi.NewServer(config.GRPCServerAddress, repository, config)
 	gapi.RegisterGoldenserviceServer(grpcServer, server)
 	reflection.Register(grpcServer)
