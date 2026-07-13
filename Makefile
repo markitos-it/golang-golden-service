@@ -21,6 +21,7 @@ help:
 	@echo "  tidy - Run code formatting and linting"
 	@echo ""
 	@echo "  appsec-test      - Run all application security tests"
+	@echo "  appsec-test-code - Run application security tests for code only"
 	@echo "  appsec-install   - Install application security tools"
 	@echo "  appsec-uninstall - Uninstall application security tools"
 	@echo ""
@@ -56,6 +57,8 @@ tidy:
 
 appsec-test:
 	@SNYK_TOKEN=${SNYK_TOKEN} bash bin/appsec/test.sh
+appsec-test-code:
+	@SNYK_TOKEN=${SNYK_TOKEN} bash bin/appsec/test-code.sh
 appsec-install:
 	bash bin/appsec/install.sh
 appsec-install-tools-with-hook:
