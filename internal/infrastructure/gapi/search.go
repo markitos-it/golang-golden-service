@@ -3,20 +3,18 @@ package gapi
 import (
 	context "context"
 	"markitos-it-svc-golden/internal/domain/services"
-
-	codes "google.golang.org/grpc/codes"
-	status "google.golang.org/grpc/status"
+	"markitos-it-svc-golden/internal/domain/shared"
 )
 
 const maxPageSize int32 = 100
 
 func (s *Server) SearchGoldens(ctx context.Context, in *SearchGoldensRequest) (*SearchGoldensResponse, error) {
 	if in.PageNumber < 1 {
-		return nil, status.Error(codes.InvalidArgument, msgInvalidPageNumber)
+		return nil, s.ToStatusError(shared.ErrInvalidPageNumber)
 	}
 
 	if in.PageSize < 1 || in.PageSize > maxPageSize {
-		return nil, status.Error(codes.InvalidArgument, msgInvalidPageSize)
+		return nil, s.ToStatusError(shared.ErrInvalidPageSize)
 	}
 
 	var service services.GoldensearchService = services.NewGoldensearchService(s.repository)

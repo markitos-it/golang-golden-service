@@ -16,7 +16,7 @@ func NewGoldenPoster(baseDir, value string) (*GoldenPoster, error) {
 		return &GoldenPoster{value}, nil
 	}
 
-	return nil, shared.ErrGoldenBadRequest
+	return nil, shared.ErrInvalidGoldenPoster
 }
 
 func isValidGoldenPoster(baseDir, value string) bool {

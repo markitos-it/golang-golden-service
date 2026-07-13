@@ -4,15 +4,13 @@ import (
 	context "context"
 	"log"
 	"markitos-it-svc-golden/internal/domain/services"
+	"markitos-it-svc-golden/internal/domain/shared"
 	"markitos-it-svc-golden/internal/domain/types"
-
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 func (s *Server) UpdateGolden(ctx context.Context, in *UpdateGoldenRequest) (*UpdateGoldenResponse, error) {
 	if _, err := types.NewGoldenId(in.Id); err != nil {
-		return nil, status.Error(codes.InvalidArgument, msgInvalidRequest)
+		return nil, s.ToStatusError(shared.ErrInvalidGoldenId)
 	}
 
 	var service services.GoldenUpdateService = services.NewGoldenUpdateService(s.repository, s.config.BaseDir)

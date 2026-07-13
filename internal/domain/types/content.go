@@ -21,7 +21,7 @@ func NewGoldenContent(value string) (*GoldenContent, error) {
 		return &GoldenContent{encoded}, nil
 	}
 
-	return nil, shared.ErrGoldenBadRequest
+	return nil, shared.ErrInvalidGoldenContent
 }
 
 func isValidGoldenContent(value string) bool {
@@ -56,7 +56,7 @@ func (c *GoldenContent) DecodedValue() (string, error) {
 
 	decoded, err := base64.StdEncoding.DecodeString(c.value)
 	if err != nil {
-		return "", shared.ErrGoldenBadRequest
+		return "", shared.ErrInvalidGoldenContent
 	}
 
 	return string(decoded), nil

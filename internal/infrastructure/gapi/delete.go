@@ -4,15 +4,13 @@ import (
 	context "context"
 	"log"
 	"markitos-it-svc-golden/internal/domain/services"
+	"markitos-it-svc-golden/internal/domain/shared"
 	"markitos-it-svc-golden/internal/domain/types"
-
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 func (s *Server) DeleteGolden(ctx context.Context, in *DeleteGoldenRequest) (*DeleteGoldenResponse, error) {
 	if _, err := types.NewGoldenId(in.Id); err != nil {
-		return nil, status.Error(codes.InvalidArgument, msgInvalidRequest)
+		return nil, s.ToStatusError(shared.ErrInvalidGoldenId)
 	}
 
 	request := services.GoldenDeleteRequest{Id: in.Id}

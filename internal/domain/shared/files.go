@@ -26,16 +26,16 @@ func SaveBase64File(baseDir, base64Data string) (string, error) {
 
 	decoded, err := base64.StdEncoding.DecodeString(base64Data)
 	if err != nil {
-		return "", ErrGoldenBadRequest
+		return "", ErrInvalidGoldenPosterData
 	}
 
 	if len(decoded) > MAX_FILE_SIZE {
-		return "", ErrGoldenBadRequest
+		return "", ErrInvalidGoldenPosterData
 	}
 
 	extension := detectFileExtension(decoded)
 	if !AllowedExtensions[extension] {
-		return "", ErrGoldenBadRequest
+		return "", ErrInvalidGoldenPosterData
 	}
 
 	filename := UUIDv4() + extension

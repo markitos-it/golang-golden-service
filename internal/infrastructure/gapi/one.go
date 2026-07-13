@@ -5,17 +5,15 @@ import (
 	"encoding/base64"
 	"log"
 	"markitos-it-svc-golden/internal/domain/services"
+	"markitos-it-svc-golden/internal/domain/shared"
 	"markitos-it-svc-golden/internal/domain/types"
 	"os"
 	"path/filepath"
-
-	"google.golang.org/grpc/codes"
-	status "google.golang.org/grpc/status"
 )
 
 func (s *Server) GetGolden(ctx context.Context, in *GetGoldenRequest) (*GetGoldenResponse, error) {
 	if _, err := types.NewGoldenId(in.Id); err != nil {
-		return nil, status.Error(codes.InvalidArgument, msgInvalidRequest)
+		return nil, s.ToStatusError(shared.ErrInvalidGoldenId)
 	}
 
 	request := services.GoldenOneRequest{Id: in.Id}

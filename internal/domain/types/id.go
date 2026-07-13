@@ -11,7 +11,7 @@ func NewGoldenId(value string) (*GoldenId, error) {
 		return &GoldenId{value}, nil
 	}
 
-	return nil, shared.ErrGoldenBadRequest
+	return nil, shared.ErrInvalidGoldenId
 }
 
 func (b *GoldenId) Value() string {

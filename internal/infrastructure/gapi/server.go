@@ -9,7 +9,6 @@ import (
 	"markitos-it-svc-golden/internal/infrastructure/configuration"
 	"os"
 	"path/filepath"
-	"strings"
 
 	codes "google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -43,14 +42,14 @@ func (s *Server) GetGRPCCode(err error) codes.Code {
 	switch {
 	case errors.Is(err, shared.ErrGoldenNotFound):
 		code = codes.NotFound
-	case errors.Is(err, shared.ErrInvalidGoldenId),
+	case errors.Is(err, shared.ErrGoldenBadRequest),
+		errors.Is(err, shared.ErrInvalidGoldenId),
 		errors.Is(err, shared.ErrInvalidGoldenName),
+		errors.Is(err, shared.ErrInvalidGoldenContent),
+		errors.Is(err, shared.ErrInvalidGoldenPoster),
+		errors.Is(err, shared.ErrInvalidGoldenPosterData),
 		errors.Is(err, shared.ErrInvalidPageNumber),
-		errors.Is(err, shared.ErrInvalidPageSize),
-		strings.Contains(err.Error(), "invalid"),
-		strings.Contains(err.Error(), "Invalid"),
-		strings.Contains(err.Error(), "illegal"),
-		strings.Contains(err.Error(), "bad request"):
+		errors.Is(err, shared.ErrInvalidPageSize):
 		code = codes.InvalidArgument
 	}
 

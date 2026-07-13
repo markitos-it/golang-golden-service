@@ -17,7 +17,7 @@ func NewGoldenName(value string) (*GoldenName, error) {
 		return &GoldenName{value}, nil
 	}
 
-	return nil, shared.ErrGoldenBadRequest
+	return nil, shared.ErrInvalidGoldenName
 }
 
 func isValidGoldenName(value string) bool {
