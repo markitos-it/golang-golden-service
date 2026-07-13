@@ -12,7 +12,7 @@ import (
 
 func (s *Server) DeleteGolden(ctx context.Context, in *DeleteGoldenRequest) (*DeleteGoldenResponse, error) {
 	if _, err := types.NewGoldenId(in.Id); err != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid request")
+		return nil, status.Error(codes.InvalidArgument, msgInvalidRequest)
 	}
 
 	request := services.GoldenDeleteRequest{Id: in.Id}

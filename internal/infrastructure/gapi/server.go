@@ -62,11 +62,11 @@ func (s *Server) ToStatusError(err error) error {
 
 	switch code {
 	case codes.InvalidArgument:
-		return status.Error(code, "invalid request")
+		return status.Error(code, msgInvalidRequest)
 	case codes.NotFound:
-		return status.Error(code, "resource not found")
+		return status.Error(code, msgResourceNotFound)
 	default:
-		return status.Error(code, "internal server error")
+		return status.Error(code, msgInternalServerErr)
 	}
 }
 

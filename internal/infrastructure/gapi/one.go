@@ -15,7 +15,7 @@ import (
 
 func (s *Server) GetGolden(ctx context.Context, in *GetGoldenRequest) (*GetGoldenResponse, error) {
 	if _, err := types.NewGoldenId(in.Id); err != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid request")
+		return nil, status.Error(codes.InvalidArgument, msgInvalidRequest)
 	}
 
 	request := services.GoldenOneRequest{Id: in.Id}

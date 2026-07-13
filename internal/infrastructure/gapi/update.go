@@ -12,7 +12,7 @@ import (
 
 func (s *Server) UpdateGolden(ctx context.Context, in *UpdateGoldenRequest) (*UpdateGoldenResponse, error) {
 	if _, err := types.NewGoldenId(in.Id); err != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid request")
+		return nil, status.Error(codes.InvalidArgument, msgInvalidRequest)
 	}
 
 	var service services.GoldenUpdateService = services.NewGoldenUpdateService(s.repository, s.config.BaseDir)

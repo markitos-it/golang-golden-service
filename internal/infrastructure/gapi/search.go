@@ -12,11 +12,11 @@ const maxPageSize int32 = 100
 
 func (s *Server) SearchGoldens(ctx context.Context, in *SearchGoldensRequest) (*SearchGoldensResponse, error) {
 	if in.PageNumber < 1 {
-		return nil, status.Error(codes.InvalidArgument, "invalid page number")
+		return nil, status.Error(codes.InvalidArgument, msgInvalidPageNumber)
 	}
 
 	if in.PageSize < 1 || in.PageSize > maxPageSize {
-		return nil, status.Error(codes.InvalidArgument, "invalid page size")
+		return nil, status.Error(codes.InvalidArgument, msgInvalidPageSize)
 	}
 
 	var service services.GoldensearchService = services.NewGoldensearchService(s.repository)
