@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: markitos_it_svc_golden
       POSTGRES_DB: markitos_it_svc_golden
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - markitos-it-svc-golden-postgres_data:/var/lib/postgresql/data
     healthcheck:

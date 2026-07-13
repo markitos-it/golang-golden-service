@@ -11,7 +11,7 @@ import (
 //[.'.]:> ========================
 //[.'.]:> Este módulo maneja la configuración de nuestra aplicación siguiendo este flujo:
 //[.'.]:>
-//[.'.]:> 1️⃣ ARCHIVO CONFIG: Busca primero un archivo app.env en el directorio especificado
+//[.'.]:> 1️⃣ ARCHIVO CONFIG: Busca primero un archivo config.yaml en el directorio especificado
 //[.'.]:>    Si lo encuentra, carga todas sus variables como configuración base
 //[.'.]:>
 //[.'.]:> 2️⃣ VARIABLES DE ENTORNO: Después de cargar el archivo (o si no existe):
@@ -22,7 +22,7 @@ import (
 //[.'.]:>    se aplican valores predeterminados para garantizar que la app pueda funcionar
 
 // [.'.]:> 🧩 Estructura que contiene toda la configuración de la aplicación
-// [.'.]:> Cada campo se mapea a una variable de entorno o valor en app.env del mismo nombre
+// [.'.]:> Cada campo se mapea a una variable de entorno o valor en config.yaml del mismo nombre
 type GoldenConfiguration struct {
 	DatabaseDsn       string `mapstructure:"DATABASE_DSN"`
 	GRPCServerAddress string `mapstructure:"GRPC_SERVER_ADDRESS"`
@@ -30,13 +30,15 @@ type GoldenConfiguration struct {
 }
 
 // [.'.]:> 🔄 Función principal que carga toda la configuración
-// [.'.]:> Recibe la ruta donde buscar el archivo app.env y devuelve la configuración completa
+// [.'.]:> Recibe la ruta donde buscar el archivo config.yaml y devuelve la configuración completa
 // [.'.]:> Si hay algún error durante la carga, lo devuelve para que la aplicación pueda manejarlo
 func LoadConfiguration(configFilesPath string) (config GoldenConfiguration, err error) {
 	viper.New()
-	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
+	viper.SetConfigName("config")
 	viper.AddConfigPath(configFilesPath)
+	viper.SetConfigName(".env")
+	viper.SetConfigType("env")
 	viper.BindEnv("DATABASE_DSN")
 	viper.BindEnv("GRPC_SERVER_ADDRESS")
 	viper.BindEnv("GOLDEN_UPLOADS_BASEDIR")
@@ -61,17 +63,25 @@ func LoadConfiguration(configFilesPath string) (config GoldenConfiguration, err 
 	return config, err
 }
 
-// [.'.]:> 📄 Intenta cargar el archivo de configuración app.env
+// [.'.]:> 📄 Intenta cargar el archivo de configuración config.yaml
 // [.'.]:> Si el archivo no existe, lo maneja elegantemente y permite continuar
 // [.'.]:> usando solo variables de entorno
 func loadConfigFile() error {
+	// Intenta leer config.yaml
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 			return err
 		}
-		fmt.Println("['.']:> 📋 Archivo de configuración no encontrado, usando solo variables de entorno")
+		fmt.Println("['.']:> 📋 Archivo 'config.yaml' no encontrado, buscando otras fuentes.")
 	} else {
-		fmt.Println("['.']:> 📋 Archivo de configuración cargado correctamente")
+		fmt.Println("['.']:> 📋 Archivo 'config.yaml' cargado correctamente.")
+	}
+
+	// Intenta fusionar con .env si existe
+	viper.SetConfigName(".env")
+	viper.SetConfigType("env")
+	if err := viper.MergeInConfig(); err == nil {
+		fmt.Println("['.']:> 📋 Archivo '.env' cargado y fusionado correctamente.")
 	}
 
 	return nil

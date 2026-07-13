@@ -133,10 +133,11 @@ The project follows a standard Go project layout:
 
 ## Configuration
 
-The application is configured using a combination of a configuration file and environment variables.
+The application is configured using a flexible system that loads settings from multiple sources. The order of priority is as follows:
 
-*   A default configuration file `app.env` can be created in the root directory.
-*   Environment variables can be used to override the values in the file.
+1.  **Environment Variables:** The most prioritized method. Any variable set in the environment (e.g., `export DATABASE_DSN=...`) will override all other settings.
+2.  **`.env` File:** You can create a `.env` file in the root directory. Its values will override those from `config.yaml`. This is useful for local development.
+3.  **`config.yaml` File:** A `config.yaml` file can be created in the root directory to define base configuration values.
 
 The `main.go` file loads the configuration at startup. Refer to `internal/infrastructure/configuration/config.go` for all available configuration options.
 
